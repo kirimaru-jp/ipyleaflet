@@ -141,7 +141,12 @@ export class LeafletDrawControlView extends control.LeafletControlView {
     let newData = [];
     this.feature_group.eachLayer((layer) => {
       const geoJson = layer.toGeoJSON();
-      geoJson.properties.style = layer.options;
+      // Follow the fix: https://github.com/jupyter-widgets/ipyleaflet/pull/1133/files
+      // geoJson.properties.style = layer.options;
+      // Sanitize layer options for serialization via `structuredClone`:
+      // https://web.dev/structured-clone/#features-and-limitations
+      const sanitizedLayerOptions = JSON.parse(JSON.stringify(layer.options));
+      geoJson.properties.style = sanitizedLayerOptions;      
       newData.push(geoJson);
     });
     this.model.set('data', newData);
